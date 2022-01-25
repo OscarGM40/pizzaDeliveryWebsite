@@ -1,0 +1,91 @@
+import Image from 'next/image';
+import styles from '../styles/Cart.module.css';
+
+
+
+const Cart = () => {
+  return (
+    <div className={styles.container}>
+      <div className={styles.left}>
+        <table className={styles.table}>
+          
+          <thead>
+            <tr className={styles.trTitle}>
+              <th className={styles.th}>Product</th>
+              <th className={styles.th}>Name</th>
+              <th className={styles.th}>Extras</th>
+              <th className={styles.th}>Price</th>
+              <th className={styles.th}>Quantity</th>
+              <th className={styles.th}>Total</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            <tr className={styles.tr}>
+              <td className={styles.td}>
+                <div className={styles.imgContainer}>
+                  <Image src="/img/pizza.png" layout="fill" objectFit="cover" alt="" />
+                </div>
+              </td>
+              <td className={styles.td}>
+                <span className={styles.name}>CORALZO</span>
+              </td>
+              <td className={styles.td}>
+                <span className={styles.extras}>Double ingredient, spicy sauce</span>
+              </td>
+              <td className={styles.td}>
+                <span className={styles.price}>$19.90</span>
+              </td>
+              <td className={styles.td}>
+                <span className={styles.quantity}>2</span>
+              </td>
+              <td className={styles.td}>
+                <span className={styles.total}>$39.80</span>
+              </td>
+            </tr>
+            <tr className={styles.tr}>
+              <td className={styles.td}>
+                <div className={styles.imgContainer}>
+                  <Image src="/img/pizza.png" layout="fill" objectFit="cover" alt="" />
+                </div>
+              </td>
+              <td className={styles.td}>
+                <span className={styles.name}>CORALZO</span>
+              </td>
+              <td className={styles.td}>
+                <span className={styles.extras}>Double ingredient, spicy sauce</span>
+              </td>
+              <td className={styles.td}>
+                <span className={styles.price}>$19.90</span>
+              </td>
+              <td className={styles.td}>
+                <span className={styles.quantity}>2</span>
+              </td>
+              <td className={styles.td}>
+                <span className={styles.total}>$39.80</span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div className={styles.right}>
+        <div className={styles.wrapper}>
+          <h2 className={styles.title}>CART TOTAL</h2>
+          <div className={styles.totalText}>
+            <b className={styles.totalTextTitle}>Subtotal:</b>$79.60
+          </div>
+          <div className={styles.totalText}>
+            <b className={styles.totalTextTitle}>Discount:</b>$0.00
+          </div>
+          <div className={styles.totalText}>
+            <b className={styles.totalTextTitle}>Total:</b>$79.60
+          </div>
+          <button className={styles.button}>CHECKOUT NOW!</button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default Cart;

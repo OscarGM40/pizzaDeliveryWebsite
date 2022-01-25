@@ -1,0 +1,176 @@
+.container {
+  height: calc(100vh - 100px);
+  display: flex;
+}
+
+.left {
+  flex: 1;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.right {
+  flex: 1;
+  padding: 20px;
+}
+
+.imgContainer {
+  width: 80%;
+  height: 80%;
+  position: relative;
+}
+
+.title {
+  font-size: 48px;
+  font-weight: bold;
+}
+
+.price {
+  color: #d1411e;
+  font-size: 32px;
+  font-weight: 400;
+  border-bottom: 1px solid #d1411e;
+}
+
+.choose {
+  font-size: 20px;
+}
+
+.desc {
+  font-size: 22px;
+  font-weight: 300;
+}
+
+.sizes {
+  display: flex;
+  width: 40%;
+  justify-content: space-between;
+}
+
+.size {
+  width: 45px;
+  height: 45px;
+  position: relative;
+  cursor: pointer;
+}
+
+.size:nth-child(2) {
+  width: 55px;
+  height: 55px;
+}
+
+.size:last-child {
+  width: 65px;
+  height: 65px;
+}
+
+.number {
+  position: absolute;
+  top: -5px;
+  right: -35px;
+  font-size: 16px;
+  background-color: teal;
+  color: white;
+  padding: 1px 7px;
+  border-radius: 12px;
+}
+
+.ingredients {
+  display: flex;
+  margin-bottom: 20px;
+}
+
+.option {
+  display: flex;
+  align-items: center;
+  margin-right: 10px;
+  font-size: 20px;
+  font-weight: 400;
+}
+
+.checkbox {
+  width: 20px;
+  height: 20px;
+}
+
+.quantity {
+  width: 50px;
+  height: 30px;
+  font-size: 18px;
+}
+
+.button {
+  height: 30px;
+  margin-left: 10px;
+  font-size: 18px;
+  background-color: #d1411e;
+  color: white;
+  border: none;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+@media screen and (max-width: 480px) {
+  .container {
+    height: auto;
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .imgContainer {
+    width: 70vw;
+    height: 40vh;
+    margin-top: 20px;
+    margin-bottom: 0;
+  }
+  .right {
+    padding-top: 10;
+  }
+
+  .title {
+    font-size: 32px;
+    margin-top: 0;
+    margin-bottom: 10;
+  }
+  .price {
+    font-size: 24px;
+  }
+  .desc {
+    margin-top: 10;
+    margin-bottom: 0;
+  }
+
+  .sizes {
+    width: 90%;
+    margin: 20px 10px;
+  }
+
+  
+  .ingredients {
+    flex-direction: column;
+  }
+
+  .option {
+    margin-right: 0;
+    font-size: 22px;
+    margin-bottom: 10px;
+  }
+
+  .button{
+    height: 50px;
+    font-size: 22px;
+    padding: 10px 10px;
+    border-radius: 7px;
+  }
+  .quantity {
+    height: 46px;
+    font-size: 20px;
+    text-align: center;
+    outline: 2px solid #d1411e;
+    border:none;
+    border-radius: 5px;
+  }
+
+}

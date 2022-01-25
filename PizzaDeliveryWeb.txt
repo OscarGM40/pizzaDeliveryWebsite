@@ -1,0 +1,393 @@
+				PIZZA DELIVERY WEBSITE WITH NEXTJS BY LAMA
+
+Fuente: https://www.youtube.com/watch?v=vIxGDq1SPZQ&t=178s
+Repo: https://github.com/safak/youtube/tree/next-pizza-ui
+
+Al usar nextJs tendré que usar varios componentes suyos.Al usar su Image Next va a optimizar esa <img>,lo cual requerirá tratarlo.
+
+Todas las páginas van a compartir la Navbar y el Footer,asi que un componente wrapper usando props.children vendrá perfecto:
+
+const Layout = ({ children }) => {
+  return (
+    <>
+      <Navbar />
+      {children}
+      <Footer />
+    </>
+  )
+}
+export default Layout
+
+El _app.js llamará a este componente:
+
+function MyApp({ Component, pageProps }) {
+  return (
+    <Layout>
+      <Component {...pageProps} />
+    </Layout>
+  );
+}
+
+export default MyApp;
+
+Perfecto.
+IMPORTANTE: fijate que al usar su Image debo especificar o bien un layout y un padre o bien un ancho y alto:
+ 1 of 1 unhandled error
+Server Error
+Error: Image with src "/img/telephone.png" must use "width" and "height" properties or "layout='fill'" property.
+Una solución es usar un ancho y alto:
+   <Image
+        src="/img/logo.png"
+        alt=""
+        width={32}
+        height={32}
+      />
+Y otra es englobar esa Image en un div y ponerla en layout="fill" y darle las medidas al padre:
+	<div style={{"width":32,"height":32}}
+   <Image
+        src="/img/logo.png"
+        alt=""
+        layout="fill"
+      />
+</div>
+Al final daría igual cual usar,las dos hacen lo mismo.
+También deben ir en una carpeta public.
+NOTA: Fijate que esta vez vamos a pegar la Navbar con position:sticky y top:0.Esto mostrará siempre la navbar,incluso al scrollear,claro.
+
+Fijate como lo mejor para centrar verticalmente las flechas es dejar que lo haga el navegador con top0 y bottom 0 y margin auto:
+.arrowContainer {
+  position: absolute;
+  width: 18%;
+  height: 23%;
+  top: 0;
+  bottom: 0;
+  margin:auto;
+
+}
+
+.container {
+  height: 100px;
+  padding: 0 50px;
+  background-color: #d1411e;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+}
+
+NOTA:fijate que nth-child(number) o first-child o last-child apuntan a ese elemento y a sus hermanos,no a sus hijos:
+.text:first-child { <- el primer .text,o sea que apunta a él 
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.text:last-child { <- el último .text
+  font-size: 24px;
+  font-weight: bold;
+}
+Fijate que fácil es hacer una Navbar con un poco tiempo y gusto.
+
+Recuerda,centro algo en absoluta fácil con top0 bottom0 y margin:auto.Para meter el slider con tres imagenes obviamente uso width:300vw.Que fakin pro.
+
+Para la lógica en el evento click sobre las arrows recojo su dirección como parámetro y establecerán un indice:
+   onClick={() => handleClick('left')}
+   onClick={() => handleClick('right')}
+
+  const [index, setIndex] = useState(0);
+
+  const handleClick = (dir) => {
+    if (dir === 'left') {
+      if (index === 0) {
+        setIndex(images.length - 1);
+      } else {
+        setIndex(index - 1);
+      }
+    } else if (dir === 'right') {
+      if (index === images.length - 1) {
+        setIndex(0);
+      } else {
+        setIndex(index + 1);
+      }
+    }
+  }
+Realmente esto se puede hacer más simple con ternarios:
+
+const handleArrow = (dir) => {
+  if(dir ==="left"){
+  setIndex(index !== 0 ? index -1 : images.lenght-1) 
+  } else if(dir === "right){
+  setIndex(index !== images.length-1 ? index+1 : 0)
+}
+Pero queda más claro de la forma larga.Y para mover la pantalla a ese wrapper de 300vw le pongo un transform:translateX(index*-100vw):
+
+      <div className={styles.wrapper} style={{
+        transform: `translateX(${-100*index}vw)`
+      }}>
+
+Como puedo ver la clave es un div de 300vw.
+Fijate border:none es muy bueno para botones
+
+NOTA:fijate como en NExt las pages deben ser todo archivos con la primera letra en minúscula:
+pages/orders/[id].jsx <- se creará la url /orders/:id. <- fijate como debería usar jsx para que me ayude el IDE
+
+IMPORTANTE: fijate en la lógica que usó para mostrar los iconos,creando varias clases condicionalmente.Y fijate que irán cambiando de clases(serán 4 elementos que pueden tener las clases AABB y despues AAAB y despues todos la AAAA):
+    
+  const statusClass = (index) => {
+    if (index - status < 1) return styles.done
+    if (index - status === 1) return styles.inProgress
+    if (index - status > 1) return styles.undone
+  }
+Si el index -statues es 0 la clase será .done, si es 1 será inProgress y si es mayor de 1 será undone.Observa que los elementos siempre van a tener una clase,o están con done o con undone o en Progress,pero siempre tendrán una de las tres.
+Luego habrá 4 divs que llaman a la función.
+  <div className={statusClass(0)}>
+  <div className={statusClass(1)}>
+  <div className={statusClass(2)}>
+
+Lo importante es que en vez de pasar un className puedo pasar una función que resuelva a lo que necesita el className.Por ejemplo podría pasar un ternario como className.Interesante.  
+
+Y cuando tengan la clase inProgress estarán con una animación sencilla,y cuando tengan la clase undone estarán apagados.Genial:
+.inProgress {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  animation: inProgress 1s ease infinite alternate;
+}
+
+@keyframes inProgress {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+  
+.undone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  opacity: 0.3;
+}
+
+.undone .checkedIcon, .inProgress .checkedIcon {
+  display: none;
+}
+Desde luego no es algo complicado,pero si sería difícil de imaginar para mi.
+ 
+							RESPONSIVENESS DE LA APP
+
+Obviamente la aplicación no es responsiva.Usaremos los breakpoints más comunes:
+320 a 480px <- xs
+481 a 768px <- sm
+769 a 1024 <- md
+1025 a 1200 <- lg
++1201 <- xlg
+
+Simplemente seguir video.
+
+				DOCKERIZING THE NEXT APP WITH NGINX
+
+NOTA: diría que siempre tendré que configurar el NGINX que use en el contenedor.
+Source: https://steveholgado.com/nginx-for-nextjs/
+Fijate que el está yendo por el folder static pero yo uso public.Fijate en el uso del modulo sharp(lo configuró sólo Next??).
+Tras containerizar la app de Next procedo con nginx.Creo una carpeta en la raiz llamada 'nginx' y un archivo llamado 'default.conf'(lo importante es que sea .conf)
+Dentro empiezo por esto:
+server {
+  listen 80 default_server;
+  server_name _;
+  server_tokens off;
+}
+
+Dado que no tengo más servers(pues será una imagen de nginx nueva) puedo llamarlo '_'.Con server_tokens a off la versión de Nginx no aparecerá en los headers de las respuestas.No parece importante
+
+Añado un bloque upstream,que no es más que un grupo de servidores que puedo referenciar por el nombre(nextjs_upstream en este caso):
+
+upstream nextjs_upstream {
+  server nextjs:3000;
+  # We could add additional servers here for load-balancing
+}
+IMPORTANTE: todo lo que meta en el upstream NGINX le hará load-balancing automáticamente.Fijate que de momento solo tengo el server nextjs:3000 saliendo por el 3000.Ese nextjs debe ser el nombre del contenedor de la app con Nextjs.
+
+Redirecciono todas las peticiones a este upstream:
+server {
+  listen 80 default_server;
+
+  server_name _;
+
+  server_tokens off;
+
+  proxy_http_version 1.1;
+  proxy_set_header Upgrade $http_upgrade;
+  proxy_set_header Connection 'upgrade';
+  proxy_set_header Host $host;
+  proxy_cache_bypass $http_upgrade;
+
+  location / {
+    proxy_pass http://nextjs_upstream; <- el nombre del upstream
+  }
+}
+
+Bien,ahora creo una nueva zona para los estáticos.Cuando se hace el build de un proyecto Next,automáticamente Next crea una zona para estáticos en /_next/static/*Puedo cachearlos con el nginx(durante 7 dias en este ejemplo):
+
+proxy_cache_path /var/cache/nginx levels=1:2 keys_zone=STATIC:10m inactive=7d use_temp_path=off;
+
+upstream nextjs_upstream {
+  server nextjs:3000;
+}
+
+server {
+  listen 80 default_server;
+
+  server_name _;
+
+  server_tokens off;
+
+  proxy_http_version 1.1;
+  proxy_set_header Upgrade $http_upgrade;
+  proxy_set_header Connection 'upgrade';
+  proxy_set_header Host $host;
+  proxy_cache_bypass $http_upgrade;
+
+  location /_next/static {
+    proxy_cache STATIC;
+    proxy_pass http://nextjs_upstream;
+
+    # For testing cache - remove before deploying to production
+    add_header X-Cache-Status $upstream_cache_status;
+  }
+
+  location / {
+    proxy_pass http://nextjs_upstream:
+}
+}
+Le estamos diciendo a NGIN que use una zona a la que llamamos STATIC(proxy_cache STATIC;) y cuyo path será lo que haya en el folder /_next/static
+Despues de nuevo le digo que pase todo al upstream(proxy_pass http://nextjs_upstream).Con proxy_pass paso todas las requests
+
+También añadimos un custom header con add_header.La key será X-Cache-Status
+add_header X-Cache-Status $upstream_cache_status;
+Ojo que este header es sólo para testear,debo remover/comentar para producción.
+
+IMPORTANTE: dado que yo voy a tener las imagenes en /public añado esto para cachear las imagenes:
+  location /static {
+  proxy_cache STATIC;
+  proxy_pass http://nextjs_upstream;
+
+Sin embargo,NextJS les va a poner un header no-cache a los assets asi que por defecto el browser nunca los cacheará.NGINX respetará este header asi que hay que saltarselo con proxy_ignore_headers Cache-Control(o el header que quiera ignorar).
+
+location /static {
+  proxy_cache STATIC;
+  proxy_ignore_headers Cache-Control;
+  proxy_cache_valid 60m;
+  proxy_pass http://nextjs_upstream;
+}
+
+NOTA:fijate que si uso proxy_cache sin proxy_cache_valid será un cache indefinida.Investigar más sobre esto.
+
+					ENABLING GZIP IN NGINX
+
+Puedo asegurarme que los archivos son comprimidos antes de ser mandados a los usuarios habilitando la compresión gzip:
+En el server{} block(no en el upstream)
+  gzip on;
+  gzip_proxied any;
+  gzip_comp_level 4;
+  gzip_types text/css application/javascript image/svg+xml;
+
+gzip on habilita la compresión
+gzip_proxied any; especifica a NGINX que cualquier proxied file can be gzipped
+gzip_comp_level 4; establece un nivel de compresión.4 suele ser correcto
+gzip_types type type type; establece los tipos de archivos a comprimir(css,javascript y svg+xml parece).
+
+Con todo esto creo el Dockerfile para el Nginx:
+
+# Base on offical NGINX Alpine image
+FROM nginx:alpine
+
+# Remove any existing config files
+RUN rm /etc/nginx/conf.d/*
+
+# Copy config files
+# *.conf files in conf.d/ dir get included in main config
+COPY ./default.conf /etc/nginx/conf.d/
+
+# Expose the listening port
+EXPOSE 80
+
+# Launch NGINX
+CMD [ "nginx", "-g", "daemon off;" ]
+
+IMPORTANTE:exponer el puerto y copiar el file con extensión .conf.
+Recuerda que todo lo que haya en /etc/nginx/conf.d/ lo requiere el archivo principal /etc/nginx/nginx.conf.Es por esto que lo copiamos alli.
+
+			MANAGING BOTH CONTAINERS WITH DOCKER COMPOSE
+
+Añado un docker-compose.yaml en la raiz.Fijate que el name del contenedor con la APP next debe ser nextjs para que NGINX cree el upstream:
+version: '3'
+services:
+  nextjs:
+  nginx: 
+* Docker Compose automáticamente creará una shared Network entre ellos y les dará visión entre ellos
+
+Me falta decir a ambos servicios donde tienen el Dockerfile(propiedad build):
+version: '3'
+services:
+  nextjs:
+    build: ./
+  nginx:
+    build: ./nginx
+De nuevo asegurate que las rutas estén bien y que exista ese folder 'nginx'
+
+So the Next.js image will be built from the root directory using the root Dockefile and the NGINX image will be built from the nginx/ directory using the nginx/Dockerfile. <-Perfecto
+
+Por último quiero acceder al puerto 80 desde afuera asi que tengo que publicarlo:
+version: '3'
+services:
+  nextjs:
+    build: ./
+  nginx:
+    build: ./nginx
+    ports:
+      - 80:80
+Fijate además que no quiero publicar puerto alguno para Next.Toda petición deberá ir por el NGINX.
+Y el NGINX puede ver al contenedor mediante el nextjs:3000 que sabrá resolver hacia el contenedor gracias a docker-compose y su NAT
+
+Ya solo falta usar 'docker-compose up -d' e ir a localhost(ojo que tenga el 80 libre,asinto).
+NOTA: puedo usar docker-compose up --build para forzar un rebuild(si por ejemplo cambio imagenes)
+
+					PARTE DOS API + DB + CONNECTING ALL
+
+Source: https://www.youtube.com/watch?v=Z-hACIsjv4E&t=115s&ab_channel=LamaDev
+Repo: https://github.com/safak/youtube/tree/next-food-ordering-app
+
+Instalare la dependencia mongoose.Esta vez vamos a cachear la conexion.
+Fijate que hasta ahora cada vez que mongoose se conectaba creaba otra conexión(confirmar esto realmente).Para prevenir esto voy  a usar el objeto global.
+
+Fijate en un par de novedades respecto a otros esquemas:
+
+const ProductSchema = new mongoose.Schema({
+  title:{ type:String, required:true, maxlength: 60 },
+  description:{ type:String, required:true, maxlength: 255 },
+  image:{ type: String, required: true, maxlength: 255 },
+  prices:{ type: [Number], required: true },
+  extraOptions: [
+    {text:{ type:String, required:true}},
+    {price:{ type:Number, required:true}}
+  ]
+
+* prices va a ser un [Number],un arreglo de numbers
+* extraOptions va a ser un arreglo de objetos que tendrán las propiedades text y price,requeridas y tipadas.Perfecto 
+
+Otra nueva mejora va a ser no crear más de un DAO.Si ya existe un modelo importo ese,si no lo creo pero para la siguiente existirá,creando sólo una instancia:
+
+export default  mongoose.models.Product || mongoose.model("Product", ProductSchema);
+
+Una vez tenga la conexión y los modelos no tengo que crear un servidor express,ya que con Next tengo un servidor y un frontend.Lo único que tengo que hacer es crear el directorio 'api' dentro de pages(pages/api).
+
+ Cualquier cosa que escriba alli creará una url y ejecutará el código que ponga en ese archivo.POr ejemplo si creo pages/api/hello.js se creará la ruta /hello y al entrar en esa ruta se ejecutará el codigo del archivo
+
+export default function handler(req, res){
+  res.status(200).json({
+    message: "Hello, world!",
+  })
+} <- investigar diferentes sintaxis sobre el controlador(debe ser sólo así?)
+Minuto 19
