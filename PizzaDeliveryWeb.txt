@@ -390,4 +390,108 @@ export default function handler(req, res){
     message: "Hello, world!",
   })
 } <- investigar diferentes sintaxis sobre el controlador(debe ser sólo así?)
-Minuto 19
+
+En cuanto a la conexión en un ambiente con Next voy a conectar así:
+
+async function dbConnect(){
+  if(cached.conn) {
+    return cached.conn;
+  }
+  if(!cached.promise) {
+    const opts = { 
+      bufferCommands:false,
+    }
+  }
+  cached.promise = mongoose.connect(MONGODB_URL, opts)
+    .then(conn => { return conn; })
+    .catch(err => { throw err; });
+  cached.conn = await cached.promise;
+  return cached.conn;
+
+}
+export default dbConnect;
+
+			CONECTAR CON MONGOOSE Y SABER EL MÉTODO REST EN UNA API DE NEXT
+
+Para poder ver el verbo REST que está usando la petición entrante simplemente lo tengo en req.method(asi como también puedo ver las cookies o los headers).
+Simplemente tendré que filtrar si req.method === 'GET' o 'POST',etc:
+
+  if(method === 'GET'){
+    try {
+      const products = await Product.find();
+      
+      res.status(200).json({
+        ok:true, 
+        message: "Products fetched successfully",
+        products
+      });
+
+    } catch (error) {
+      res.status(500).json({
+        ok:false,
+        message: "Error listing products",
+        error: error.message,
+      });
+    }
+  }
+
+  if(method === 'POST'){
+	...
+Fijate como conectamos con la DB,no puede ser más sencillo:
+ dbConnect(); 
+NOTA:recuerda que en NextJS primero hago el fetch de la data y despues muestro el componente.Llegados a este punto usaremos axios asi que lo instalo(fijate que Next me va a pedir todo tipo de dependencias,como mongoose y axios)
+
+					PETICIONES EN NEXT
+  					getServerSideProps
+
+NOTA:si exporto una función con el nombre de getServerSideProps desde una page,Next pre-renderizará esta página en cada petición con la data devuelta con esta función getServerSideProps.
+IMPORTANTE:fijate que lo hace en cada petición a esta página y que debo exportar la función:
+
+export async function getServerSideProps(context){
+  return {
+     props: {} <- will be passed to the page component as props.
+ } };
+Fijate que devolverá un objeto con la propiedad props al componente.
+GetServerSideProps sólo corre en el servidor y nunca en el browser
+GetServerSideProps sólo puede ser exportado desde una page.Nunca desde otro tipo de archivo.Además debe ser exportado.
+
+Con todo esto simplemente hago la petición en el index y devuelvo lo necesario por props.Fijate que la elección del método es correcta.
+
+export const getServerSideProps = async (ctx) => {
+  const { data }  = await axios.get("http://localhost:3000/api/products")
+
+  return {
+    props: {
+      pizzaList: data.products
+    }
+  }
+}
+Ahora ya puedo hacer con props.pizzaList lo que necesite.Genial.
+Bien,al llegar a las PizzaCards con el link a una Pizza obviamente nos falta el controlador en nuestra api que pida un documento por id.
+
+export default async function handler(req,res){
+  
+  dbConnect();
+  /* fijate que se recogen por la query en Next */
+  // console.log(req.query,'<- req.query');
+
+  if(req.method == 'GET'){
+    try {
+      const product = await Product.findById(req.query.id);
+
+      res.status(200).json({
+        ok:true, 
+        message: "Product by ID fetched successfully",
+        product
+      });
+    } catch (error) {
+      res.status(500).json({
+        ok:false,
+        message: "Error fetching product by ID",
+        error: error.message,
+      });
+    }
+  }
+
+Fijate que en Next tengo que usar en esa función handler req.query aunque venga asi /api/products/4kh5k45.
+MINUTO 37

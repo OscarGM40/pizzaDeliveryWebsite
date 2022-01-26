@@ -1,4 +1,5 @@
 
+import axios from 'axios';
 import Image from 'next/image';
 import { useState } from 'react';
 import styles from '../../styles/Product.module.css';
@@ -12,7 +13,7 @@ const pizza = {
 }
 
 
-const Product = () => {
+const Product = ({pizza}) => {
 
   const [size, setSize] = useState(0);
 
@@ -31,8 +32,8 @@ const Product = () => {
       </div>
 
       <div className={styles.right}>
-        <h1 className={styles.title}>{pizza.name}</h1>
-        <span className={styles.price}>${pizza.price[size]}</span>
+        <h1 className={styles.title}>{pizza.title}</h1>
+        <span className={styles.price}>${pizza.prices[size]}</span>
         <p className={styles.desc}>${pizza.desc}</p>
         <p className={styles.size}></p>
         <h3 className={styles.choose}>Choose the size</h3>
@@ -125,3 +126,18 @@ const Product = () => {
 }
 
 export default Product
+
+
+export async function getServerSideProps(context) {
+  console.log(context.params.id)
+
+  const res = await axios.get(`http://localhost:3000/api/products/${context.params.id}`);
+  const product = res.data;
+  console.log(product)
+
+  return {
+    props: {
+      pizza: product.product
+    },
+  };
+}
