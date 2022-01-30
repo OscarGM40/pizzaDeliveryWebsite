@@ -10,6 +10,7 @@ import {
 } from "@paypal/react-paypal-js";
 import { useRouter } from 'next/router';
 import { reset } from '../redux/cartSlice';
+import { OrderDetail } from '../components/OrderDetail';
 
 
 
@@ -179,7 +180,7 @@ const Cart = () => {
                     "AY2HKVIf7xj2D3ZjKDQJFRgkjhLg1wmbsk5ezG4lTfPbAa7DOQ-HAYULkPtS7nP9e1MWKotBrQZW4ST4",
                   components: "buttons",
                   currency: "USD",
-                  "disable-funding": "credit,card,p24",
+                  "disable-funding": "credit,card,p24,sofort",
                 }}
               >
                 <ButtonWrapper
@@ -194,7 +195,9 @@ const Cart = () => {
           )}
         </div>
       </div>
-      { cash && <OrderDetail total={cart.total} createOrder={createOrder} />}
+      { cash && <OrderDetail
+        total={cart.total.toFixed(2)}
+        createOrder={createOrder} />}
     </div>
   );
 };

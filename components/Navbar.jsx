@@ -30,13 +30,14 @@ const Navbar = () => {
       <div className={styles.item}>
 
         <ul className={styles.list}>
-          <Link href="/">
+          <Link href="/" passHref >
             <li className={styles.listItem}>Homepage</li>
           </Link>
           <li className={styles.listItem}>Products</li>
           <li className={styles.listItem}>Menu</li>
           <Image
             src="/img/logo.png"
+            
             alt=""
             width={160}
             height={69}
@@ -48,7 +49,7 @@ const Navbar = () => {
 
       </div>
 
-      <Link href="/cart" >
+      <Link href="/cart" passHref >
         <div className={styles.item}>
           <div className={styles.cart}>
             <Image

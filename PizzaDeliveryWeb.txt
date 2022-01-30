@@ -713,4 +713,54 @@ onApprove={function (data, actions) {
           method: 1,
           });
 
-1h27m
+NOTA:fijate que Lama llama a getServerSideProps dentro del componente.Parece que da igual donde ponerlo:
+
+...
+export default Order;
+
+export const getServerSideProps = async (ctx) => {
+  console.log(ctx.params.id, 'id');
+
+  const { id } = ctx.params;
+  const resp = await axios.get(`http://localhost:3000/api/orders/${id}`);
+  
+  return {
+    props: {
+      order: resp.data.order
+    }
+  }
+}
+Lo que si que es obligatorio es exportar la función.
+
+						CASH METHOD PAYMENT
+
+Para crear el método por cash,que también será simulado creamos un nuevo componente:
+  { cash && <OrderDetail
+        total={cart.total.toFixed(2)}
+        createOrder={createOrder} />}
+
+A este componente le mandamos el total y la función para crear una Order.Con un pequeño form recogo el customer y la address:
+export const OrderDetail = ( { total,createOrder} ) => {
+  const cart = useSelector(state => state.cart);
+  const dispatch = useDispatch();
+
+  // console.log(total,createOrder);
+  const [ customer, setCustomer ] = useState('');
+  const [ address, setAddress ] = useState('');
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    createOrder({
+      customer,
+      address,
+      total,
+      method: 0,
+    });
+    dispatch(reset());
+  }
+  
+Y creamos la order.
+
+					IMPLEMENTING ADMIN FEATURES 
+
+1h44m
