@@ -763,4 +763,65 @@ Y creamos la order.
 
 					IMPLEMENTING ADMIN FEATURES 
 
-1h44m
+Seguir el video.Creo las dos tablas pidiendo las Orders y los Products.En los botones para borrar fijate que hay que crear los endpoints en pages/api:
+
+En pages/api/products/[id].js:
+
+  if(req.method == 'DELETE'){
+    try {
+      await Product.findByIdAndDelete(req.query.id);
+
+      res.status(200).json({
+        ok:true, 
+        message: "Product by ID deleted successfully",
+      });
+    } catch (error) {
+      res.status(500).json({
+        ok:false,
+        message: "Error deleting product by ID",
+        error: error.message,
+      });
+    }
+  }
+Y simplemente lo llamo en el onClick del botón.
+Para editar lo haremos más adelante.Para cambiar el estado del pedido también es muy sencillo.Primero rescato la Order por el id:
+
+ <button className={styles.button}
+    onClick={() => handleStatus(order._id) }  >Next Stage</button>
+
+Despues aumento en 1 el estado y lo actualizo:
+
+  const handleStatus = async (id) => {
+    const item = orderList.find(order => order._id === id);
+    item.status = item.status >= 2 ? 0: item.status + 1;
+
+    try {
+      const res = await axios.put("http://localhost:3000/api/orders/"+id,{status: item.status });
+      setOrderList(orderList?.map(order => order._id === id ? res.data.order : order));
+    } catch (error) {
+      console.log(error);
+    }
+  }
+Obviamente hay que crear el endpoint en pages/api/orders/[id].js y el método PUT: if (method === "PUT") {
+    try {
+      const order = await Order.findByIdAndUpdate(req.query.id, req.body, {
+        new: true,
+      });
+
+      res.status(200).json({
+        ok: true,
+        message: "Order by ID updated successfully",
+        order,
+      });
+    } catch (error) {
+      res.status(500).json({
+        ok: false,
+        message: "Error updating order by ID",
+        error: error.message,
+      });
+    }
+  }
+Puedo observar la potencia de Next,realmente es más poderoso que React en varios aspectos.
+Bien,para crear un Producto,realmente aún no hemos creado ningun tipo de autenticación,cualquiera puede ir a /admin.Lo que vamos a hacer es crear un login y mediante cookies ver si el user es un admin:
+
+			2H04M	AUTH IMPL Y COOKIES

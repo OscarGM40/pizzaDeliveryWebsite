@@ -9,7 +9,7 @@ export default async function handler(req, res){
   // console.log(method,'<- method');
   // console.log(cookies,'<- cookies');
 
-  dbConnect();
+  await dbConnect();
 
   if(method === 'GET'){
     try {

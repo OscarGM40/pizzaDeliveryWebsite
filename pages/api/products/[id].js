@@ -28,7 +28,7 @@ export default async function handler(req,res){
 
   if(req.method == 'PUT'){
     try {
-      const product = await Product.findById(req.query.id);
+      const product = await Product.findByIdAndUpdate(req.query.id, req.body, {new:true});
 
       res.status(200).json({
         ok:true, 
@@ -43,19 +43,19 @@ export default async function handler(req,res){
       });
     }
   }
-  if(req.method == 'GET'){
+  
+  if(req.method == 'DELETE'){
     try {
-      const product = await Product.findById(req.query.id);
+      await Product.findByIdAndDelete(req.query.id);
 
       res.status(200).json({
         ok:true, 
-        message: "Product by ID fetched successfully",
-        product
+        message: "Product by ID deleted successfully",
       });
     } catch (error) {
       res.status(500).json({
         ok:false,
-        message: "Error fetching product by ID",
+        message: "Error deleting product by ID",
         error: error.message,
       });
     }
