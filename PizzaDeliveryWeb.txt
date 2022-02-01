@@ -825,3 +825,150 @@ Puedo observar la potencia de Next,realmente es más poderoso que React en vario
 Bien,para crear un Producto,realmente aún no hemos creado ningun tipo de autenticación,cualquiera puede ir a /admin.Lo que vamos a hacer es crear un login y mediante cookies ver si el user es un admin:
 
 			2H04M	AUTH IMPL Y COOKIES
+
+Lo primero será instalar el paquete 'cookie':
+npm add cookie
+Dado que seá una aplicación para el dueño del restaurante sólo habrá un usuario,luego lo podría definir en el .env file:
+USERNAME = jane@gmail.com
+PASSWORD = ABCabc123
+TOKEN = Sw0rdf1sh
+
+Importo el paquete y creo una cookie si el login es correcto con el método res.setHeader:
+
+export default handler = (req, res) => {
+  
+  if(req.method === 'POST'){
+    const { username,password } = req.body;
+    
+    if(username === process.env.USERNAME && password === process.env.PASSWORD){
+       
+      res.setHeader(
+          "Set-Cookie", 
+          cookie.serialize('token', process.env.TOKEN, {
+            maxAge:60*60,
+            sameSite: 'strict',
+            path: '/', //visible a toda la app
+          }));
+      res.status(200).json({
+        message: 'Login correcto',
+        token: process.env.TOKEN
+      });
+    }else{
+      res.status(401).json({
+        message: 'Login incorrecto'
+      });
+    }
+  }
+
+No hace falta más,ni siquiera el register.A continuación creamos el Login.
+	
+  const router = useRouter();
+
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    try {
+      const response = await axios.post('http://localhost:3000/api/admin/login', { username, password });
+      router.push('/admin');
+    } catch (error) {
+      console.log(error);
+      setError('Usuario o contraseña incorrectos');
+    }
+  }
+NOTA: fijate como se redirecciona en Next,con el método router.push(url).El enrutador de Next viene del hook useRouter();
+
+Bien,ahora queremos comprobar esta cookie.Para ver la cookie simplemente accedo por el ctx del método getServerSideProps(en este caso,como hemos redireccionado a /admin voy a /pages/api/admin/index.js).En ese método:
+export const getServerSideProps = async (ctx) => {
+
+  const myCookie = ctx.req?.cookies || '';
+
+  console.log(myCookie);
+  console.log(process.env.TOKEN);
+
+  if(myCookie.token !==   process.env.TOKEN) {
+    return {
+      redirect:{
+        destination:"/admin/login",
+        permanent:false
+      }
+    }
+  }
+Puedo hacer el refresh y me quedaré en la misma página,pero si borro el token seré redirigido al login.Luego ningun usuario podrá entrar sin haberse logeado.Genial.
+Fijate que tuvimos que poner ctx.res?.cookies porque puede que res sea undefined.Bien,ya tenemos el login,añadamos un botón que sólo lo verá el admin,usando la misma lógica,para añadir un Product.
+
+export const getServerSideProps = async (ctx) => {
+  let admin = false;
+  const myCookie = ctx.res?.cookies || "";
+  if(myCookie.token === process.env.TOKEN){
+    admin=true;
+  }
+  return {
+    props {
+    ...
+    admin
+NOTA:recuerda que la cookie la llamamos token luego está en cookie.token.Fijate como esta vez mandamos a la vista una prop boleana si el user es un admin,en vez de redireccionar como antes.
+
+2h24m
+
+					APPENDIX REDUX ASYNC ACTIONS
+
+Cuando vaya a usar acciones asíncronas tengo que tomar otra aproximación.Es muy parecido a usar el redux normal + redux-thunk.Además,tengo dos opciones,usar el método createAsyncThunk de @reduxjs/toolkit,que va a trabajar sobre redux-thunk entre bambalinas(y al hacer esto tendré que crear la propiedad extraReducers en el createSlice) o hacer esto mismo pero sin la rigidez de tener que seguir estos pasos.
+Imaginando una simple llamada a una DB,que por tanto creará una acción asincrona:
+
+FORMA UNO: con una función asincrona y mis propios reducers sincronos.
+
+PASO UNO -como initialState debo crearme propiedades para el error,el loading y el payload normal y reducers(funciones sincronas) gestionando la carga o loading  y el posible error
+
+export const userSlice = createSlice({
+  name:"user",
+  initialState:{
+    user:{ name:"jane", email:"jane@gmail.com"},
+    pending: false, <- el nombre da igual
+    error: false,
+  },
+  reducers: {
+    updateStart: (state) => {
+      state.pending:true,
+	},
+    updateSuccess: (state,action) => {
+      state.user = action.payload,
+      state.pending=false,
+      state.error= false,
+  },
+   updateError: (state) => {
+      state.error=true,
+      state.pending=false,
+})
+export const { updateStart,updateSuccess,updateError} = userSlice.actions;
+export default userSlice.reducer;
+
+PASO DOS: en otro archivo aparte creo funciones asincronas que tendrán un try/catch y llamarán sincronamente a estas acciones.Importante,estas funciones reciben el disparador siempre por argumento,que debo pasarlo al dispararlas:
+
+NOTA:fijate que necesito el dispatch para disparar las actions,por eso lo tengo que pasar al llamarla:
+
+export const updateUser = async (user,dispatch) => {
+  dispatch(updateStart()); <- necesito el dispatch
+  try{
+  const user = await axios.put(url,user); <- llamo a la api,etc
+  dispatch( updateSuccess(user.data.user); <- y disparo la acción
+  } catch(error){
+  dispatch(updateError());
+  }
+}
+
+PASO TRES: llamar a esta función asincrona donde sea necesario,y pasarla el dispatch pues es necesario:
+
+En el componente con el formulario,etc...
+
+const dispatch = useDispatch();
+const handleSubmit = (e) => {
+  e.preventDefault();
+  updateUser(user,dispatch); <- llamo a la función asíncrona y le paso lo necesario.
+
+Obviamente tengo acceso mediante el hook useSelector a pending y error,etc:
+const { user,pending,error } = useSelector(state => state.user}
+<button disabled={pending}>
+{error ? "ha habido un error" : "user updated"} 
+
+Esta primera forma es muy flexible,aunque @reduxjs/toolkit intenta también resumir esto.Para ello tendré que usar el método createAsyncThunk,que devolverá tres estados automáticamente(pending,fullfilled y rejected).
+
+FORMA DOS: con createAsyncThunk
