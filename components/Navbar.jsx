@@ -33,7 +33,9 @@ const Navbar = () => {
           <Link href="/" passHref >
             <li className={styles.listItem}>Homepage</li>
           </Link>
-          <li className={styles.listItem}>Products</li>
+          <Link href="/admin" passHref >
+            <li className={styles.listItem}>Admin</li>
+          </Link>
           <li className={styles.listItem}>Menu</li>
           <Image
             src="/img/logo.png"

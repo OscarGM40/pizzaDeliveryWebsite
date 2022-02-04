@@ -5,9 +5,7 @@ import dbConnect from "../../../utils/dbConnection";
 
 export default async function handler(req, res){
   const { method, cookies } = req;
-
-  // console.log(method,'<- method');
-  // console.log(cookies,'<- cookies');
+  const token = cookies.token;
 
   await dbConnect();
 
@@ -31,15 +29,21 @@ export default async function handler(req, res){
   }
 
   if(method === 'POST'){
+    if(!token || token !== process.env.TOKEN){
+     return res.status(401).json({
+        ok:false,
+        message: "Unauthorized",
+      });
+    }
     try {
       const product = await Product.create(req.body)
-      res.status(201).json({
+     return res.status(201).json({
         ok:true,
         message: 'Product created successfully',
         product,
       })
     } catch (error) {
-      res.status(500).json({
+      return res.status(500).json({
         ok:false,
         message: 'Error creating product',
         error

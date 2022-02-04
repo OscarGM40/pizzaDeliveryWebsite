@@ -1,13 +1,146 @@
 .mainAddButton {
-  padding: 10px;
-  margin: 20px;
   background-color: #d1411e;
-  width: 150px;
   border-radius: 10px;
   color: white;
-  font-weight: 500;
-  text-align: center;
   cursor: pointer;
   font-size: 18px;
+  font-weight: 500;
+  margin: 20px;
+  padding: 10px;
+  text-align: center;
+  width: 150px;
 }
 
+.container {
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(245, 240, 240, 0.5);
+  position: fixed;
+  top: 0;
+  z-index: 999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.wrapper {
+  width: 700px;
+  height: 600px;
+  background-color: white;
+  border-radius: 20px;  
+  padding: 10px 50px 30px 50px;
+  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  position: relative;
+}
+
+.close {
+  width: 30px;
+  height: 30px;
+  background-color: black;
+  color:white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  position: absolute;
+  top: -10px;
+  right: -10px;
+
+}
+
+.item {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 10px;
+}
+
+.label {
+  font-size: 18px;
+  font-weight: 300;
+  letter-spacing: 2px;
+  font-style: oblique;
+  margin-bottom: 10px;
+}
+
+.input {
+  border: none;
+  border-bottom: 1px solid rgb(192, 191, 191);
+  outline: none;
+  font-size: 16px;
+}
+
+.textarea {
+  font-size: 16px;
+  border-radius: 5px;
+  padding: 5px;
+}
+
+.priceContainer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.inputSm {
+  width: 25%;
+  font-size: 16px;
+}
+
+.inputSm::placeholder{
+  font-size: 16px;
+  font-weight: 300;
+  /* letter-spacing: 2px; */
+  /* font-style: oblique; */
+}
+
+.extra {
+  display: flex;
+  justify-content: space-between;
+}
+
+.extraItems {
+  margin: 10px 1px;
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.extraItem {
+  margin: 5px;
+  padding: 5px;
+  border: 1px solid tomato;
+  color: rgb(59, 14, 7);
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 300;
+  letter-spacing: 2px;
+  font-style: oblique;
+}
+
+.extraButton {
+  border-radius: 10px;
+  border:none;
+  cursor: pointer;
+  color: white;
+  font-size: 16px;
+  font-weight: 500;
+  background-color: teal;
+  padding: 6px 15px;
+}
+
+.addButton {
+  background-color: #d1411e;
+  border-radius: 10px;
+  border:none;
+  cursor: pointer;
+  color: white;
+  font-size: 18px;
+  font-weight: 500;
+  padding: 10px;
+  text-align: center;
+  width: 25%;
+}

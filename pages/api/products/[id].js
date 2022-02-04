@@ -3,8 +3,10 @@ import dbConnect from "../../../utils/dbConnection";
 
 
 export default async function handler(req,res){
-  
-  dbConnect();
+    const { cookies } = req;
+    const token = cookies.token;
+
+  await dbConnect();
   /* fijate que un param :id se recoge por la query en Next */
   // console.log(req.query,'aqui tendré los params obligatorios');
 
@@ -27,6 +29,12 @@ export default async function handler(req,res){
   }
 
   if(req.method == 'PUT'){
+       if (!token || token !== process.env.TOKEN) {
+        return res.status(401).json({
+           ok: false,
+           message: "Unauthorized",
+         });
+       }
     try {
       const product = await Product.findByIdAndUpdate(req.query.id, req.body, {new:true});
 
@@ -45,6 +53,12 @@ export default async function handler(req,res){
   }
   
   if(req.method == 'DELETE'){
+       if (!token || token !== process.env.TOKEN) {
+        return res.status(401).json({
+           ok: false,
+           message: "Unauthorized",
+         });
+       }
     try {
       await Product.findByIdAndDelete(req.query.id);
 

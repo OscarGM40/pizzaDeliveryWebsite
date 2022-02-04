@@ -497,19 +497,19 @@ Fijate que en Next tengo que usar en esa función handler req.query aunque venga
 
 Para rescatar los precios mapeo por las extraOptions:
 
-       {pizza.extraOptions.map( option => (
-          <div className={styles.option} key={option._id}>
-            <input
-              type="checkbox"
-              id={option.text}
-              name={option.text}
-              onChange={(e)=>handleChange(e,option)}
-              className={styles.checkbox} />
-            <label htmlFor="double">
-              {option.text}
-            </label>
-          </div>
-         ))} 
+  {pizza.extraOptions.map( option => (
+     <div className={styles.option} key={option._id}>
+       <input
+    type="checkbox"
+    id={option.text}
+    name={option.text}
+    onChange={(e)=>handleChange(e,option)}
+    className={styles.checkbox} />
+       <label htmlFor="double">
+    {option.text}
+       </label>
+     </div>
+    ))} 
 
 Y además la mando a la función handleChange:
 onChange={(e)=>handleChange(e,option)}
@@ -907,7 +907,116 @@ export const getServerSideProps = async (ctx) => {
     admin
 NOTA:recuerda que la cookie la llamamos token luego está en cookie.token.Fijate como esta vez mandamos a la vista una prop boleana si el user es un admin,en vez de redireccionar como antes.
 
-2h24m
+Para los inputs para el precio fijate como usa dos clases:
+<div className={styles.item}>
+ <label className={styles.label}>Prices</label>
+ <div className={styles.priceContainer}>
+   <input
+     className={`${styles.input} ${styles.inputSm}`}
+     type="number"
+     placeholder="Small"
+     onChange={(e) => changePrice(e, 0)}
+   />
+   <input
+     className={`${styles.input} ${styles.inputSm}`}
+     type="number"
+     placeholder="Medium"
+     onChange={(e) => changePrice(e, 1)}
+   />
+   <input
+     className={`${styles.input} ${styles.inputSm}`}
+     type="number"
+     placeholder="Large"
+            onChange={(e) => changePrice(e, 2)}
+          />
+        </div>
+      </div>
+Y también manda dos argumentos,el evento y el indice.
+
+Y para los extras va a crear un grupo de dos inputs,uno de texto y otro tipo number:
+ <div className={styles.item}>
+   <label className={styles.label}>Extra</label>
+   <div className={styles.extra}>
+     <input
+  className={`${styles.input} ${styles.inputSm}`}
+  type="text"
+  placeholder="Item"
+  name="text"
+  onChange={handleExtraInput}
+     />
+     <input
+  className={`${styles.input} ${styles.inputSm}`}
+  type="number"
+    placeholder="Price"
+    name="price"
+    onChange={handleExtraInput}
+   />
+   <button className={styles.extraButton} onClick={handleExtra}>
+     Add
+   </button>
+   </div>
+
+				SUBIDA DE IMAGENES - CLOUDINARY -
+
+Cloudinary es un servicio muy bueno para subir imagenes.Puedo subirlas tras registrarme con la clase FormData a mi enpoint.
+Fijate que será:  https://api.cloudinary.com/v1_1/<username>/image/upload.En mi caso será:
+
+  const uploadRes = await axios.post('https://api.cloudinary.com/v1_1/oscargm40/image/upload',data, 
+
+NOTA: para añadir una carpeta  y que no vaya todo al home tengo que añadir un preset(en settings/upload).
+Alli eligo unsigned y le doy tanto al presetname como al folder el nombre de la carpeta.
+
+IMPORTANTE: hay que añadir siempre un preset a la subida.Fijate que al final me van a devolver muchas cosas,entre ellas una url y una secure_url(son la misma):
+
+ const handleCreate = async (e) => {
+    e.preventDefault();
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('upload_preset', "pizzaWebsite");
+    /* lo subo a Cloudinary */
+    try {
+      const uploadRes = await axios.post('https://api.cloudinary.com/v1_1/oscargm40/image/upload', formData);
+      console.log(uploadRes.data.secure_url);
+      console.log(uploadRes);
+    } catch (error) {
+      console.log(error)
+    }
+Fijate que en tres lineas estoy subiendo archivos y teniendo una url para ellos.Increible.
+
+Termino de crear el producto.Fijate que ya tenia creado el endpoint.
+IMPORTANTE: NextJS no permitirá ninguna url externa por defecto.Dado que cloudinary me va a crear url externas tengo que configurarlo en una whitelist:
+
+Este es el error:
+Error: Invalid src prop (https://res.cloudinary.com/oscargm40/image/upload/v1644003489/pizzaWebsite/c4wxub46utygo1so27zy.jpg) on `next/image`, hostname "res.cloudinary.com" is not configured under images in your `next.config.js`
+
+Ya me está diciendo alli que vaya al next.config.js:
+module.exports = {
+  images:{
+    domains: [
+      "res.cloudinary.com",
+    ],
+  }
+}
+NOTA:puedo quitar el setting que tenia por defecto del modo estricto.
+NOTA: cualquier cambio en este archivo pedirá reiniciar la app
+
+IMPORTANTE: recuerda securizar cada controlador,en este proyecto solo un admin con token debe poder crear un Product luego sacamos el token de las cookies en la peticion al querer crear:
+
+export default async function handler(req, res){
+  const { method, cookies } = req;
+  const token = cookies.token;
+
+  if(method === 'POST'){
+    if(!token || token !== process.env.TOKEN){
+      return res.status(401).json({
+        ok:false,
+        message: "Unauthorized",
+      });
+    }
+    try {
+      const product = await Product.create(req.body)
+
+Si no viene el token o no coincide envio un 401.Y hago lo mismo para editar o borrar.Perfecto.Faltaría subir la app.
 
 					APPENDIX REDUX ASYNC ACTIONS
 
@@ -971,4 +1080,47 @@ const { user,pending,error } = useSelector(state => state.user}
 
 Esta primera forma es muy flexible,aunque @reduxjs/toolkit intenta también resumir esto.Para ello tendré que usar el método createAsyncThunk,que devolverá tres estados automáticamente(pending,fullfilled y rejected).
 
-FORMA DOS: con createAsyncThunk
+FORMA DOS: con createAsyncThunk(name,async function)
+Realmente el concepto es el mismo,sólo que @reduxjs/toolkit gestionará los errores y el loading en una función asincrona que crearé con su método createAsyncThunk.
+NOTA:fijate que Redux gestionará las actionsCreators,etc...
+
+PASO UNO: creo las funciones asincronas que quiera sin gestionar el error:
+
+import { createAsyncThunk,createSlice}from '@reduxjs/toolkit';
+import axios from 'axios';
+
+* fijate que la llamo igual que la otra custom
+export const updateUser = createAsyncThunk("[users] Update", async (user) => {
+	const res = await axios.put(url,{user});
+	return res.data; <- importante retornar la response
+});
+IMPORTANTE: el nombre de la action da igual,lo va a gestionar redux,recuerda que no debo gestionar el error,todo funcionará automáticamente.
+
+PASO DOS: ahora en la sección extraReducers,especial para estas funciones,gestiono todo de forma muy parecida también a la anterior:
+
+extraReducers:{
+  [updateUser.pending]:(state) => {
+    state.pending = true;
+    state.error = false;
+  },
+  [updateUser.fullfilled]:(state,action) => {
+    state.pending = false;
+    state.error = false;
+	state.user = action.payload
+  },
+  [updateUser.rejected]:(state) => {
+	state.error = true;
+    state.pending = false;
+  }
+}
+
+Es simplemente seguir la sintaxis([function.state]).Obviamente debería crear un file para estas funciones.Seguir investigando y mejorando en redux/toolkit.
+
+NOTA:recuerda que configureStore fusiona los slices también automáticamente al rootReducer:
+export default configureStore({
+  reducer: {
+   user: userReducer,
+   auth:authReducer,
+   ui: uiReducer
+   ...
+} });
